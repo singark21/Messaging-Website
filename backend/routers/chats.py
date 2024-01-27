@@ -49,7 +49,7 @@ def delete_chat(chat_id: str) -> None:
     db.delete_chat(chat_id)
 
 
-@chats_router.delete(
+@chats_router.get(
     "/{chat_id}/messages",
     response_model=MsgCollection,
 )
@@ -61,7 +61,7 @@ def get_msgs(chat_id: str):
         messages=sorted(messages, key=sort_key),
     )
 
-@chats_router.delete(
+@chats_router.get(
     "/{chat_id}/users",
     response_model=UserCollection,
 )
