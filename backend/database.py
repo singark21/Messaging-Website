@@ -122,12 +122,8 @@ def update_chat(chat_id: str, chat_update: ChatUpdate) -> ChatInDB:
     :param chat_update: attributes to be updated on the chat
     :return: the updated chat
     """
-
-    chat = get_chat_by_id(chat_id)
-   
-    for attr, value in chat_update.model_dump(exclude_none=True).items():
-        setattr(chat, attr, value)
-    return chat
+    DB["chats"][chat_id]["name"] = chat_update.name
+    return DB["chats"][chat_id]
 
 def delete_chat(chat_id: str):
     """
