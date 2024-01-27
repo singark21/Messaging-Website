@@ -54,14 +54,14 @@ def create_user(user: UserCreate) -> UserInDB:
             })
             
         
-    
-    user = UserInDB(
-        id=user.id,
-        created_at=date.now().isoformat(),
-        **user.model_dump(),
-    )
-    DB["users"][user.id] = user.model_dump()
-    return user
+    else:
+        newUser = UserInDB(
+            id=user.id,
+            created_at=date.today(),
+           # **user.model_dump(),
+        )
+        DB["users"][user.id] = newUser
+        return newUser
 
 
 
