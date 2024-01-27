@@ -50,7 +50,7 @@ def create_user(user: UserCreate) -> UserInDB:
             detail={
                 "type": "duplicate_entity",
                 "entity_name": "User",
-                "entity_id": "new_user_id"
+                "entity_id": user.id
             })
             
         
