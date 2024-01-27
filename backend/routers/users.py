@@ -14,7 +14,9 @@ from backend import database as db
 
 users_router = APIRouter(prefix="/users", tags=["Users"])
 
-@users_router.get("", response_model=UserCollection)
+@users_router.get("", 
+                  response_model=UserCollection,
+                  description="Get all users",)
 def get_users():
     users = db.get_all_users()
     sort_key = lambda user: user.id
@@ -24,7 +26,9 @@ def get_users():
     )
 
 
-@users_router.post("", response_model=UserResponse)
+@users_router.post("", 
+                   response_model=UserResponse,
+                   description="Create a user",)
 def create_user(user: UserCreate):
     
     # Need case for duplicate ID

@@ -13,7 +13,9 @@ from backend.entities import (
 from backend import database as db
 chats_router = APIRouter(prefix="/chats", tags=["Chats"])
 
-@chats_router.get("", response_model=ChatCollection)
+@chats_router.get("", 
+                  response_model=ChatCollection,
+                  description="Get all chats.",)
 def get_chats():
     chats = db.get_all_chats()
     sort_key = lambda chat: chat.name
@@ -25,14 +27,16 @@ def get_chats():
 @chats_router.get(
     "/{chat_id}",
     response_model=ChatResponse,
-    description="Get a user for a given user id.",
+    description="Get a chat with the given chat id.",
 )
 def get_chat(chat_id: str):
     """Get a chat for a given id."""
 
     return ChatResponse(chat=db.get_chat_by_id(chat_id))
 
-@chats_router.put("/{chat_id}", response_model=ChatResponse)
+@chats_router.put("/{chat_id}", 
+                  response_model=ChatResponse,
+                  description="Updates a chat with the given chat id.",)
 def update_chat(chat_id: str, chat_update: ChatUpdate):
     """Update an chat for a given id."""
 
@@ -44,6 +48,7 @@ def update_chat(chat_id: str, chat_update: ChatUpdate):
     "/{chat_id}",
     status_code=204,
     response_model=None,
+    description="Delete the chat with the given chat id.",
 )
 def delete_chat(chat_id: str) -> None:
     db.delete_chat(chat_id)
@@ -52,6 +57,7 @@ def delete_chat(chat_id: str) -> None:
 @chats_router.get(
     "/{chat_id}/messages",
     response_model=MsgCollection,
+    description="Get messages for chat with given chat id.",
 )
 def get_msgs(chat_id: str):
     messages = db.get_messages_in_chat(chat_id)
@@ -64,6 +70,7 @@ def get_msgs(chat_id: str):
 @chats_router.get(
     "/{chat_id}/users",
     response_model=UserCollection,
+    description="Get users for chat with given chat id.",
 )
 def get_users(chat_id: str):
     users = db.get_users_in_chat(chat_id)
