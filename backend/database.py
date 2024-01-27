@@ -122,8 +122,10 @@ def update_chat(chat_id: str, chat_update: ChatUpdate) -> ChatInDB:
     :param chat_update: attributes to be updated on the chat
     :return: the updated chat
     """
-    DB["chats"][chat_id]["name"] = chat_update.name
-    return DB["chats"][chat_id]
+    if chat_id in DB["chats"]:
+        DB["chats"][chat_id]["name"] = chat_update.name
+        return DB["chats"][chat_id]
+    raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
 
 def delete_chat(chat_id: str):
     """
