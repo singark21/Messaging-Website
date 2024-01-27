@@ -1,5 +1,5 @@
 import json
-from datetime import date
+from datetime import datetime
 from uuid import uuid4
 from fastapi.exceptions import HTTPException
 from backend.entities import (
@@ -57,7 +57,7 @@ def create_user(user: UserCreate) -> UserInDB:
     else:
         newUser = UserInDB(
             id=user.id,
-            created_at=date.today(),
+            created_at=datetime.now().isoformat()
            # **user.model_dump(),
         )
         DB["users"][user.id] = newUser
