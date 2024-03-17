@@ -1,14 +1,23 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
+from backend.auth import auth_router
 from backend.routers.chats import chats_router
 from backend.routers.users import users_router
 from backend.database import EntityNotFoundException
+from contextlib import asynccontextmanager
+from backend.database import create_db_and_tables
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
 
 app = FastAPI(
     title="Messaging app",
-    description="API for meessaging",
+    description="API for messaging",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -21,7 +30,7 @@ app.add_middleware(
 
 app.include_router(chats_router)
 app.include_router(users_router)
-
+app.include_router(auth_router)
 
 @app.exception_handler(EntityNotFoundException)
 def handle_entity_not_found(

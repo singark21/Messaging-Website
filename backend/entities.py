@@ -2,32 +2,69 @@ from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
+from typing import Optional
 
-class ChatInDB(BaseModel):
-    """Represents a chat in the database."""
-
-    id: str
-    name: str
-    user_ids: list[str]
-    owner_id: str
-    created_at: datetime
+from sqlmodel import Field, Relationship, SQLModel, Session, create_engine
 
 
-class UserInDB(BaseModel):
-    """Represents a user in the database."""
 
-    id: str
-    created_at: datetime
+
+
+class UserChatLinkInDB(SQLModel, table=True):
+    """Database model for many-to-many relation of users to chats."""
+
+    __tablename__ = "user_chat_links"
+
+    user_id: int = Field(foreign_key="users.id", primary_key=True)
+    chat_id: int = Field(foreign_key="chats.id", primary_key=True)
+
+
+class UserInDB(SQLModel, table=True):
+    """Database model for user."""
+
+    __tablename__ = "users"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    username: str = Field(unique=True, index=True)
+    email: str = Field(unique=True)
+    hashed_password: str
+    created_at: Optional[datetime] = Field(default_factory=datetime.now)
+
+    chats: list["ChatInDB"] = Relationship(
+        back_populates="users",
+        link_model=UserChatLinkInDB,
+    )
+
+
+
 
 class UserCreate(BaseModel):
     """Represents parameters for adding a new user to the system."""
 
-    id: str
+    id: int
     
+
+class User(SQLModel):
+    id: int 
+    username: str 
+    email: str
+    created_at: datetime
+
+
 class UserResponse(BaseModel):
     """Represents an API response for an user."""
+    user: User
 
-    user: UserInDB
+class UserUpdate(SQLModel):
+    """Request model for updating user in the system."""
+
+    username: str = None
+    email: str = None
+    
+
+
+
+
 
 class Metadata(BaseModel):
     """Represents metadata for a collection."""
@@ -38,40 +75,76 @@ class UserCollection(BaseModel):
     """Represents an API response for a collection of users."""
 
     meta: Metadata
-    users: list[UserInDB]
+    users: list[User]
 
-class ChatInDB(BaseModel):
-    """Represents a user in the database."""
 
-    id: str
+
+
+
+
+class ChatInDB(SQLModel, table=True):
+    """Database model for chat."""
+
+    __tablename__ = "chats"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
     name: str
-    user_ids: list[str]
-    owner_id: str
-    created_at: datetime
+    owner_id: int = Field(foreign_key="users.id")
+    created_at: Optional[datetime] = Field(default_factory=datetime.now)
 
-class MsgInDB(BaseModel):
-    id: str
-    user_id: str
-    text: str
-    created_at: datetime
+    owner: UserInDB = Relationship()
+    users: list[UserInDB] = Relationship(
+        back_populates="chats",
+        link_model=UserChatLinkInDB,
+    )
+    messages: list["MessageInDB"] = Relationship(back_populates="chat")
 
-class MsgCollection(BaseModel):
-    meta: Metadata
-    messages: list[MsgInDB]
+class Chat(BaseModel):
+    id: int
+    name: str
+    owner: User 
+    created_at: datetime
 
 class ChatCollection(BaseModel):
     """Represents an API response for a collection of chats."""
 
     meta: Metadata
-    chats: list[ChatInDB]
+    chats: list[Chat]
 
+
+    
 class ChatResponse(BaseModel):
     """Represents an API response for an user."""
 
-    chat: ChatInDB
+    chat: Chat
 
-class ChatUpdate(BaseModel):
-    """Represents parameters for updating an chat in the system."""
+class ChatUpdate(SQLModel):
+    """Represents parameters for updating a chat in the system."""
 
     name: str 
-    
+
+
+class MessageInDB(SQLModel, table=True):
+    """Database model for message."""
+
+    __tablename__ = "messages"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    text: str
+    user_id: int = Field(foreign_key="users.id")
+    chat_id: int = Field(foreign_key="chats.id")
+    created_at: Optional[datetime] = Field(default_factory=datetime.now)
+
+    user: UserInDB = Relationship()
+    chat: ChatInDB = Relationship(back_populates="messages")
+
+class MessageResponse(BaseModel):
+    id: int
+    text: str
+    chat_id: int 
+    user: User
+    created_at: datetime
+
+class MsgCollection(BaseModel):
+    meta: Metadata
+    messages: list[MessageResponse]

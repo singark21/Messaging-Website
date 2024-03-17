@@ -2,12 +2,17 @@ import json
 from datetime import datetime
 from uuid import uuid4
 from fastapi.exceptions import HTTPException
+
+from sqlmodel import Session, SQLModel, create_engine, select
+
 from backend.entities import (
+    UserChatLinkInDB,
     UserInDB,
     UserCreate,
+    UserUpdate,
     ChatInDB,
     ChatUpdate,
-    MsgInDB
+    MessageInDB,
 )
 
 with open("backend/fake_db.json", "r") as f:
@@ -18,26 +23,24 @@ class EntityNotFoundException(Exception):
         self.entity_name = entity_name
         self.entity_id = entity_id
 
-def get_all_users() -> list[UserInDB]:
+def get_all_users(session: Session) -> list[UserInDB]:
     """
     Retrieve all users from the database.
 
     :return: ordered list of users
     """
+    return session.exec(select(UserInDB)).all()
 
-    return [UserInDB(**user_data) for user_data in DB["users"].values()]
 
-
-def get_all_chats() -> list[ChatInDB]:
+def get_all_chats(session: Session) -> list[ChatInDB]:
     """
     Retrieve all chats from the database.
 
     :return: ordered list of chats
     """
+    return session.exec(select(ChatInDB)).all()
 
-    return [ChatInDB(**chat_data) for chat_data in DB["chats"].values()]
-
-def create_user(user: UserCreate) -> UserInDB:
+def create_user(session: Session, user: UserCreate) -> UserInDB:
     """
     Create a new user in the database.
 
@@ -57,14 +60,16 @@ def create_user(user: UserCreate) -> UserInDB:
     else:
         newUser = UserInDB(
             id = user.id,
-            created_at = datetime.now().isoformat()
+            created_at = datetime.now().isoformat(),
         )
-        DB["users"][user.id] = {"id": user.id, "created_at":newUser.created_at}
+        session.add(newUser)
+        session.commit
+        session.refresh(newUser)
         return newUser
 
 
 
-def get_user_by_id(user_id: str) -> UserInDB:
+def get_user_by_id(session: Session, user_id: int) -> UserInDB:
     """
     Retrieve a user from the database.
 
@@ -72,34 +77,69 @@ def get_user_by_id(user_id: str) -> UserInDB:
     :return: the retrieved user
     :raises EntityNotFoundException: if no such user id exists
     """
-
-    if user_id in DB["users"]:
-        return UserInDB(**DB["users"][user_id])
+    user = session.get(UserInDB, user_id)
+    if user:
+        return user
 
     raise EntityNotFoundException(entity_name="User", entity_id=user_id)
 
 
+def update_user(session: Session, user: UserInDB, user_update: UserUpdate):
+
+    for attr, value in user_update.model_dump(exclude_unset=True).items():
+        setattr(user, attr, value)
+
+    
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
 
 
-def get_chats_with_user(user_id: str) -> list[ChatInDB]:
-    if user_id in DB["users"]:
-        return [ChatInDB(**chat_data) for chat_data in DB["chats"].values() if user_id in chat_data.get("user_ids", [])]
+
+
+
+
+
+
+
+def get_chats_with_user(session: Session, user_id: int) -> list[ChatInDB]:
+    #if user_id in DB["users"]:
+    user = session.get(UserInDB, user_id)
+    if user:
+        return session.exec(select(ChatInDB).join(UserChatLinkInDB).where(UserChatLinkInDB.user_id == user_id)).all()
     raise EntityNotFoundException(entity_name="User", entity_id=user_id)
     
 
-def get_messages_in_chat(chat_id: str):
-    if chat_id in DB["chats"]:
-        chat_msgs = DB["chats"][chat_id].get("messages", [])
-        return [MsgInDB(**message_data) for message_data in chat_msgs]
+def get_messages_in_chat(session: Session, chat_id: int):
+    chat = session.get(ChatInDB, chat_id)
+    if chat:
+        return session.exec(select(MessageInDB).where(MessageInDB.chat_id == chat_id)).all()
     raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
 
-def get_users_in_chat(chat_id:str) -> list[UserInDB]:
-    if chat_id in DB["chats"]:
-        chat_user_ids = DB["chats"][chat_id].get("user_ids", [])
-        return [get_user_by_id(user_id) for user_id in chat_user_ids]
+
+def get_users_in_chat(session: Session, chat_id:int) -> list[UserInDB]:
+   
+    chat = session.get(ChatInDB, chat_id)
+    if chat:
+
+
+    # users = []
+
+    # for user_id in user_ids:
+    #     user = session.exec(UserInDB).filter(UserInDB.id == user_id).first()
+    #     if user:
+    #         users.append(user)
+
+    # users.sort(key=lambda user: user.created_at)
+
+    # return users
+
+        return session.exec(select(UserInDB).join(UserChatLinkInDB).where(UserChatLinkInDB.chat_id == chat_id)).all()
     raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
 
-def get_chat_by_id(chat_id: str) -> ChatInDB:
+
+def get_chat_by_id(session: Session, chat_id: int) -> ChatInDB:
     """
     Retrieve a chat from the database.
 
@@ -107,14 +147,14 @@ def get_chat_by_id(chat_id: str) -> ChatInDB:
     :return: the retrieved user
     :raises EntityNotFoundException: if no such user id exists
     """
-
-    if chat_id in DB["chats"]:
-        return ChatInDB(**DB["chats"][chat_id])
+    chat = session.get(ChatInDB, chat_id)
+    if chat:
+        return chat
 
     raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
 
 
-def update_chat(chat_id: str, chat_update: ChatUpdate) -> ChatInDB:
+def update_chat(session: Session, chat_id: int, chat_update: ChatUpdate ) -> ChatInDB:
     """
     Update an chat in the database.
 
@@ -122,12 +162,19 @@ def update_chat(chat_id: str, chat_update: ChatUpdate) -> ChatInDB:
     :param chat_update: attributes to be updated on the chat
     :return: the updated chat
     """
-    if chat_id in DB["chats"]:
-        DB["chats"][chat_id]["name"] = chat_update.name
-        return DB["chats"][chat_id]
-    raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
 
-def delete_chat(chat_id: str):
+    chat = get_chat_by_id(session, chat_id)
+
+    for attr, value in chat_update.model_dump(exclude_unset=True).items():
+        setattr(chat, attr, value)
+
+    
+    session.add(chat)
+    session.commit()
+    session.refresh(chat)
+    return chat
+
+def delete_chat(session: Session, chat_id: int):
     """
     Delete an chat from the database.
 
@@ -135,5 +182,22 @@ def delete_chat(chat_id: str):
     :raises EntityNotFoundException: if no such chat exists
     """
 
-    chat = get_chat_by_id(chat_id)
-    del DB["chats"][chat.id]
+    chat = get_chat_by_id(session, chat_id)
+    session.delete(chat)
+    session.commit()
+
+
+
+
+engine = create_engine(
+    "sqlite:///backend/pony_express.db",
+    echo=True,
+    connect_args={"check_same_thread": False},
+)
+
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
+def get_session():
+    with Session(engine) as session:
+        yield session
