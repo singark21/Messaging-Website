@@ -102,7 +102,6 @@ def get_users(chat_id: int, session: Session = Depends(db.get_session)):
     "/{chat_id}/messages",
     response_model=MessageResponse,
     description="Creates a new message for chat with the given chat id.",
-    status_code=201
 )
 def post_msg(new_message: NewMessage, chat_id= int, user: UserInDB = Depends(get_current_user),  session: Session = Depends(db.get_session)):
     
