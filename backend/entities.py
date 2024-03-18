@@ -136,7 +136,7 @@ class MessageInDB(SQLModel, table=True):
     chat: ChatInDB = Relationship(back_populates="messages")
 
 
-class Message(BaseModel):
+class Message(SQLModel):
     id: int
     text: str
     chat_id: int 
