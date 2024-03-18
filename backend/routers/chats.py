@@ -22,6 +22,17 @@ from sqlmodel import Session
 
 chats_router = APIRouter(prefix="/chats", tags=["Chats"])
 
+@chats_router.post(
+    "/{chat_id}/messages",
+    response_model=MessageResponse,
+    description="Creates a new message for chat with the given chat id.",
+)
+def post_msg(new_message: NewMessage, chat_id= int, user: UserInDB = Depends(get_current_user),  session: Session = Depends(db.get_session)):
+    
+    return db.add_message(session, user, chat_id, new_message)
+
+
+
 @chats_router.get("", 
                   response_model=ChatCollection,
                   description="Get all chats.",)
@@ -98,14 +109,6 @@ def get_users(chat_id: int, session: Session = Depends(db.get_session)):
     )
 
     
-@chats_router.post(
-    "/{chat_id}/messages",
-    response_model=MessageResponse,
-    description="Creates a new message for chat with the given chat id.",
-)
-def post_msg(new_message: NewMessage, chat_id= int, user: UserInDB = Depends(get_current_user),  session: Session = Depends(db.get_session)):
-    
-    return db.add_message(session, user, chat_id, new_message)
 
     
 
