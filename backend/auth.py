@@ -12,7 +12,7 @@ from pydantic import BaseModel, ValidationError
 from sqlmodel import Session, SQLModel, select
 
 from backend import database as db
-from backend.entities import User, UserInDB
+from backend.entities import User, UserInDB, UserResponse
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -85,7 +85,7 @@ class ExpiredToken(AuthException):
 
 
 
-@auth_router.post("/registration", response_model=User, status_code=201)
+@auth_router.post("/registration", response_model=UserResponse, status_code=201)
 def register_new_user(
     registration: UserRegistration,
     # session: Session = Depends(db.get_session),
@@ -107,7 +107,7 @@ def register_new_user(
                 "entity_value": user.email,
             })
     
-    elif(session.exec(select(UserInDB).where(UserInDB.username==user.username)).first()):
+    if(session.exec(select(UserInDB).where(UserInDB.username==user.username)).first()):
         raise HTTPException(
             status_code = 422,
             detail={
@@ -115,11 +115,11 @@ def register_new_user(
                 "entity_field": "username",
                 "entity_value": user.username,
             })
-    else:
-        session.add(user)
-        session.commit()
-        session.refresh(user)
-        return user
+    
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return UserResponse(user = user)
     
 
 
