@@ -14,6 +14,7 @@ from backend.entities import (
     MsgCollection,
     MessageResponse,
     NewMessage,
+    Message,
     UserCollection,
 )
 from backend import database as db
@@ -75,7 +76,9 @@ def get_chat(
     response_data = {"meta": meta, "chat": chat}
 
     if "messages" in include:
-        response_data["messages"] = messages
+        updatedMessages = [Message(id=message.id, text=message.text, chat_id=message.chat_id, user=message.user,created_at = message.created_at)
+             for message in messages]
+        response_data["messages"] = updatedMessages
 
     if "users" in include:
         users = db.get_users_in_chat(session, chat_id)
