@@ -113,10 +113,11 @@ def get_msgs(chat_id: int, session: Session = Depends(db.get_session)):
     messagesInDB = db.get_messages_in_chat(session, chat_id)
 
     messages = []
-    for message in messagesInDB:
-        userInDB = message.user
+    for messageDB in messagesInDB:
+        userInDB = messageDB.user
         messageUser = User(id=userInDB.id, username=userInDB.username, email=userInDB.email, created_at=userInDB.created_at)
-        message = MessageResponse(id= message.id, text= message.text, chat_id= message.chat_id, user= messageUser, created_at=message.created_at)
+        message = Message(id= messageDB.id, text= messageDB.text, chat_id= messageDB.chat_id, user= messageUser, created_at=messageDB.created_at)
+
         messages.append(message)
     sort_key = lambda msg: msg.created_at
     return MsgCollection(

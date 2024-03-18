@@ -148,7 +148,7 @@ class MessageResponse(BaseModel):
 
 class MsgCollection(BaseModel):
     meta: Metadata
-    messages: list[MessageResponse]
+    messages: list[Message]
 
 class NewMessage(BaseModel):
     """Represents parameters for sending a new message in the system."""
