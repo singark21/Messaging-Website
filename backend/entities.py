@@ -108,12 +108,20 @@ class ChatCollection(BaseModel):
     meta: Metadata
     chats: list[Chat]
 
+class Message(SQLModel):
+    id: int
+    text: str
+    chat_id: int 
+    user: User
+    created_at: datetime
 
     
 class ChatResponse(BaseModel):
     """Represents an API response for an user."""
-
+    meta: Optional[Metadata]
     chat: Chat
+    users: Optional[list[User]]
+    messages: Optional[list[Message]]
 
 class ChatUpdate(SQLModel):
     """Represents parameters for updating a chat in the system."""
@@ -136,12 +144,6 @@ class MessageInDB(SQLModel, table=True):
     chat: ChatInDB = Relationship(back_populates="messages")
 
 
-class Message(SQLModel):
-    id: int
-    text: str
-    chat_id: int 
-    user: User
-    created_at: datetime
 
 class MessageResponse(BaseModel):
     message: Message

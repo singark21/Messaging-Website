@@ -56,10 +56,46 @@ def get_chats(session: Session = Depends(db.get_session)):
     response_model=ChatResponse,
     description="Get a chat with the given chat id.",
 )
-def get_chat(chat_id: int, session: Session = Depends(db.get_session)):
+def get_chat(chat_id: int, include: list[str] = None, session: Session = Depends(db.get_session)):
     """Get a chat for a given id."""
-    
-    return ChatResponse(chat=db.get_chat_by_id(session, chat_id))
+    chatInDB=db.get_chat_by_id(session, chat_id)
+    chat = Chat(id=chatInDB.id, name=chatInDB.name, owner=chatInDB.owner, created_at=chatInDB.created_at)
+    if include is not None:
+        if "messages" and "users" in include:
+            return ChatResponse(
+                meta={"message_count": len(chatInDB.messages),
+                    "user_count": len(chatInDB.users)
+                    },
+                chat=chat,
+                messages = chatInDB.messages,
+                users = chatInDB.users
+            )
+        elif "users" in include:
+            return ChatResponse(
+                meta={"message_count": len(chatInDB.messages),
+                    "user_count": len(chatInDB.users)
+                    },
+                chat=chat,
+                users = chatInDB.users
+            )
+        else:
+            return ChatResponse(
+                meta={"message_count": len(chatInDB.messages),
+                    "user_count": len(chatInDB.users)
+                    },
+                chat=chat,
+                messages = chatInDB.messages
+            )
+    else:
+        return ChatResponse(
+            meta={"message_count": len(chatInDB.messages),
+                "user_count": len(chatInDB.users)
+                },
+            chat=chat,
+        )
+
+
+
 
 @chats_router.put("/{chat_id}", 
                   response_model=ChatResponse,
