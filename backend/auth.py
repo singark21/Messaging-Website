@@ -168,6 +168,7 @@ def get_current_user(
 ) -> UserInDB:
     """FastAPI dependency to get current user from bearer token."""
     user = _decode_access_token(session, token)
+
     return user
 
 

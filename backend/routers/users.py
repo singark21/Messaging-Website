@@ -35,6 +35,17 @@ def get_users(session: Session = Depends(db.get_session)):
     )
 
 
+
+@users_router.get(
+    "/me",
+    response_model=UserResponse,
+    description="Get the current user.",
+)
+def get_self(user: UserInDB = Depends(get_current_user)):
+    return UserResponse(user = user)
+
+
+
 @users_router.get(
     "/{user_id}",
     response_model=UserResponse,
@@ -70,14 +81,6 @@ def get_user_chats(user_id: int, session: Session = Depends(db.get_session)):
 
 
 
-
-@users_router.get(
-    "/me",
-    response_model=UserResponse,
-    description="Get the current user.",
-)
-def get_self(user: UserInDB = Depends(get_current_user)):
-    return UserResponse(user = user)
 
 @users_router.put(
     "/me",
