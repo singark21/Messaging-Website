@@ -75,10 +75,10 @@ def get_chat(
     response_data = {"meta": meta, "chat": chat}
 
     if "messages" in include:
-        response_data["messages"] = messages["messages"]
+        response_data["messages"] = messages
 
     if "users" in include:
-        users = db.get_chats_with_user(session, chat_id)["users"]
+        users = db.get_users_in_chat(session, chat_id)
         response_data["users"] = users
 
     return response_data
