@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from datetime import date
-from typing import Literal,Optional
+from typing import List, Literal,Optional
 from fastapi.exceptions import HTTPException
 from backend.auth import get_current_user
 from backend.entities import (
@@ -53,62 +53,35 @@ def get_chats(session: Session = Depends(db.get_session)):
 
 @chats_router.get(
     "/{chat_id}",
-    description="Get a chat with the given chat id.",
+    description="Retrieve a chat by id",
+    #response_model=ChatResponse
 )
-def get_chat(chat_id: int, include: Optional[list[str]], session: Session = Depends(db.get_session)):
-    """Get a chat for a given id."""
-    chatInDB=db.get_chat_by_id(session, chat_id)
-    chat = Chat(id=chatInDB.id, name=chatInDB.name, owner=chatInDB.owner, created_at=chatInDB.created_at)
-    if include is not None:
-        if "messages" and "users" in include:
-            return {
-                "meta":{"message_count": len(chatInDB.messages),
-                    "user_count": len(chatInDB.users)
-                    },
-                "chat":{
-                    chat
-                },
-                "messages":{
-                    chatInDB.messages
-                },
-                "users":{
-                    chatInDB.users
-                }
-            }
-            
-        elif "users" in include:
-            return {
-                "meta":{"message_count": len(chatInDB.messages),
-                    "user_count": len(chatInDB.users)
-                    },
-                "chat":{
-                    chat
-                },
-                "users":{
-                    chatInDB.users
-                }
-            }
-        else:
-            return {
-                "meta":{"message_count": len(chatInDB.messages),
-                    "user_count": len(chatInDB.users)
-                    },
-                "chat":{
-                    chat
-                },
-                "messages":{
-                    chatInDB.messages
-                }
-            }
-    else:
-        return {
-                "meta":{"message_count": len(chatInDB.messages),
-                    "user_count": len(chatInDB.users)
-                    },
-                "chat":{
-                    chat
-                }
-        }
+def get_chat(
+    chat_id: int,
+    include: List[str] = Query([], description="List of keys to include in the response"),
+    session: Session = Depends(db.get_session)
+):
+    """
+    Returns a chat using the provided chat ID.
+    """
+    chatInDB = db.get_chat_by_id(session, chat_id)
+    userInDB = db.get_user_by_id(session,chatInDB.owner.id)
+    userResponse = User(id=userInDB.id, username=userInDB.username, email=userInDB.email, created_at=userInDB.created_at)
+
+    chat = Chat(id=chatInDB.id, name=chatInDB.name, owner=userResponse, created_at=chatInDB.created_at)
+    messages = db.get_messages_in_chat(session, chat_id)
+    meta = {"message_count":len(messages), "user_count": len(chatInDB.users)}
+
+    response_data = {"meta": meta, "chat": chat}
+
+    if "messages" in include:
+        response_data["messages"] = messages["messages"]
+
+    if "users" in include:
+        users = db.get_chats_with_user(session, chat_id)["users"]
+        response_data["users"] = users
+
+    return response_data
 
 
 
