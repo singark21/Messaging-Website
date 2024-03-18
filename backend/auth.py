@@ -103,6 +103,7 @@ def register_new_user(
             status_code = 422,
             detail={
                 "type": "duplicate_value",
+                "entity_name": "User",
                 "entity_field": "email",
                 "entity_value": user.email,
             })
@@ -112,6 +113,7 @@ def register_new_user(
             status_code = 422,
             detail={
                 "type": "duplicate_value",
+                "entity_name": "User",
                 "entity_field": "username",
                 "entity_value": user.username,
             })
