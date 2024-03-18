@@ -10,6 +10,8 @@ from backend.entities import (
     UserInDB,
     UserCreate,
     UserUpdate,
+    User,
+    UserResponse,
     ChatInDB,
     ChatUpdate,
     MessageInDB,
@@ -136,11 +138,13 @@ def add_message(session: Session, user: UserInDB, chat_id: int, new_message: New
     session.add(messageInDB)
     session.commit()
     session.refresh(messageInDB)
+    formattedUser = User(id=user.id, username=user.username, email=user.email, created_at=user.created_at)
+    userResponse = UserResponse(user = formattedUser)
     message = Message(
         id = newID,
         text = new_message.text,
         chat_id=chat.id,
-        user = user,
+        user = userResponse,
         created_at = datetime.now().isoformat(),
     )
     return MessageResponse(
