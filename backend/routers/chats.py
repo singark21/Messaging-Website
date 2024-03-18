@@ -53,7 +53,6 @@ def get_chats(session: Session = Depends(db.get_session)):
 
 @chats_router.get(
     "/{chat_id}",
-    response_model=ChatResponse,
     description="Get a chat with the given chat id.",
 )
 def get_chat(chat_id: int, include: Optional[list[str]], session: Session = Depends(db.get_session)):
