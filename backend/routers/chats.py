@@ -13,6 +13,7 @@ from backend.entities import (
     Chat,
     MsgCollection,
     MessageResponse,
+    NewMessage,
     UserCollection,
 )
 from backend import database as db
@@ -97,25 +98,15 @@ def get_users(chat_id: int, session: Session = Depends(db.get_session)):
     )
 
     
-# @chats_router.post(
-#     "/{chat_id}/messages",
-#     response_model=MessageResponse,
-#     description="Creates a new message for chat with the given chat id.",
-# )
-# def post_msg(user: UserInDB = Depends(get_current_user), chat_id: int, session: Session = Depends(db.get_session)):
-#     messagesInDB = db.get_messages_in_chat(session, chat_id)
-
-#     messages = []
-#     for message in messagesInDB:
-#         userInDB = message.user
-#         messageUser = User(id=userInDB.id, username=userInDB.username, email=userInDB.email, created_at=userInDB.created_at)
-#         message = MessageResponse(id= message.id, text= message.text, chat_id= message.chat_id, user= messageUser, created_at=message.created_at)
-#         messages.append(message)
-#     sort_key = lambda msg: msg.created_at
-#     return MsgCollection(
-#         meta={"count": len(messages)},
-#         messages=sorted(messages, key=sort_key),
-#     )   
+@chats_router.post(
+    "/{chat_id}/messages",
+    response_model=MessageResponse,
+    description="Creates a new message for chat with the given chat id.",
+    status_code=201
+)
+def post_msg(new_message: NewMessage, chat_id= int, user: UserInDB = Depends(get_current_user),  session: Session = Depends(db.get_session)):
+    
+    return db.add_message(session, user, chat_id, new_message)
 
     
 

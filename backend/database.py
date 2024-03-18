@@ -13,6 +13,9 @@ from backend.entities import (
     ChatInDB,
     ChatUpdate,
     MessageInDB,
+    NewMessage,
+    MessageResponse,
+    Message
 )
 
 with open("backend/fake_db.json", "r") as f:
@@ -118,23 +121,39 @@ def get_messages_in_chat(session: Session, chat_id: int):
     raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
 
 
+
+def add_message(session: Session, user: UserInDB, chat_id: int, new_message: NewMessage):
+    chat = get_chat_by_id(session, chat_id)
+    newID = session.exec(select(MessageInDB).where(MessageInDB.chat_id == chat_id)).all().count()
+    messageInDB = MessageInDB(
+            id = newID,
+            text = new_message.text,
+            user_id=user.id,
+            chat_id=chat.id,
+            user = user,
+            created_at = datetime.now().isoformat(),
+        )
+    session.add(messageInDB)
+    session.commit()
+    session.refresh(messageInDB)
+    message = Message(
+        id = newID,
+        text = new_message.text,
+        chat_id=chat.id,
+        user = user,
+        created_at = datetime.now().isoformat(),
+    )
+    return MessageResponse(
+        message=message
+    )
+
+
+
+
 def get_users_in_chat(session: Session, chat_id:int) -> list[UserInDB]:
    
     chat = session.get(ChatInDB, chat_id)
     if chat:
-
-
-    # users = []
-
-    # for user_id in user_ids:
-    #     user = session.exec(UserInDB).filter(UserInDB.id == user_id).first()
-    #     if user:
-    #         users.append(user)
-
-    # users.sort(key=lambda user: user.created_at)
-
-    # return users
-
         return session.exec(select(UserInDB).join(UserChatLinkInDB).where(UserChatLinkInDB.chat_id == chat_id)).all()
     raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
 

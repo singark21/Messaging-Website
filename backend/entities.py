@@ -63,9 +63,6 @@ class UserUpdate(SQLModel):
     
 
 
-
-
-
 class Metadata(BaseModel):
     """Represents metadata for a collection."""
 
@@ -138,13 +135,22 @@ class MessageInDB(SQLModel, table=True):
     user: UserInDB = Relationship()
     chat: ChatInDB = Relationship(back_populates="messages")
 
-class MessageResponse(BaseModel):
+
+class Message(BaseModel):
     id: int
     text: str
     chat_id: int 
     user: User
     created_at: datetime
 
+class MessageResponse(BaseModel):
+    message: Message
+    
+
 class MsgCollection(BaseModel):
     meta: Metadata
     messages: list[MessageResponse]
+
+class NewMessage(BaseModel):
+    """Represents parameters for sending a new message in the system."""
+    text: str
