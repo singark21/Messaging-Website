@@ -118,10 +118,10 @@ class Message(SQLModel):
     
 class ChatResponse(BaseModel):
     """Represents an API response for an user."""
-    meta: Optional[Metadata]
+    meta: Optional[Metadata] = None
     chat: Chat
-    users: Optional[list[User]]
-    messages: Optional[list[Message]]
+    users: Optional[list[User]] = None
+    messages: Optional[list[Message]] = None
 
 class ChatUpdate(SQLModel):
     """Represents parameters for updating a chat in the system."""
