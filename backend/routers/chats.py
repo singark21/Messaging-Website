@@ -79,7 +79,9 @@ def get_chat(
 
     if "users" in include:
         users = db.get_users_in_chat(session, chat_id)
-        response_data["users"] = users
+        updatedUsers = [User(id=user.id, username=user.username, email=user.email, created_at=user.created_at)
+             for user in users]
+        response_data["users"] = updatedUsers
 
     return response_data
 
