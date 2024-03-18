@@ -126,13 +126,10 @@ def get_messages_in_chat(session: Session, chat_id: int):
 
 def add_message(session: Session, user: UserInDB, chat_id: int, new_message: NewMessage):
     chat = get_chat_by_id(session, chat_id)
-    newID = len(session.exec(select(MessageInDB).where(MessageInDB.chat_id == chat_id)).all())
     messageInDB = MessageInDB(
-            id = newID,
             text = new_message.text,
             user_id=user.id,
             chat_id=chat.id,
-            created_at = datetime.now().isoformat(),
             user = user,
             chat = chat,
             
@@ -142,7 +139,7 @@ def add_message(session: Session, user: UserInDB, chat_id: int, new_message: New
     session.refresh(messageInDB)
     formattedUser = User(id=user.id, username=user.username, email=user.email, created_at=user.created_at)
     message = Message(
-        id = newID,
+        id = messageInDB.id,
         text = new_message.text,
         chat_id=chat.id,
         user = formattedUser,
