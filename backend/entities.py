@@ -58,8 +58,8 @@ class UserResponse(BaseModel):
 class UserUpdate(SQLModel):
     """Request model for updating user in the system."""
 
-    username: str = None
-    email: str = None
+    username: Optional[str] = None
+    email: Optional[str] = None
     
 
 

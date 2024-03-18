@@ -24,7 +24,7 @@ users_router = APIRouter(prefix="/users", tags=["Users"])
     response_model=UserResponse,
     description="Update the current user.",
 )
-def update_self(user: UserInDB = Depends(get_current_user), user_update = UserUpdate, session: Session = Depends(db.get_session)):
+def update_self(user_update: UserUpdate, user: UserInDB = Depends(get_current_user), session: Session = Depends(db.get_session)):
     updatedUser = db.update_user(session, user, user_update) 
     userResponse = User(id=updatedUser.id, username=updatedUser.username, email=updatedUser.email, created_at=updatedUser.created_at)
     return UserResponse(user = userResponse)
