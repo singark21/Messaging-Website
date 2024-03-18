@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from datetime import date
-from typing import Literal
+from typing import Literal,Optional
 from fastapi.exceptions import HTTPException
 from backend.auth import get_current_user
 from backend.entities import (
@@ -56,43 +56,60 @@ def get_chats(session: Session = Depends(db.get_session)):
     response_model=ChatResponse,
     description="Get a chat with the given chat id.",
 )
-def get_chat(chat_id: int, include: list[str] = None, session: Session = Depends(db.get_session)):
+def get_chat(chat_id: int, include: Optional[list[str]], session: Session = Depends(db.get_session)):
     """Get a chat for a given id."""
     chatInDB=db.get_chat_by_id(session, chat_id)
     chat = Chat(id=chatInDB.id, name=chatInDB.name, owner=chatInDB.owner, created_at=chatInDB.created_at)
     if include is not None:
         if "messages" and "users" in include:
-            return ChatResponse(
-                meta={"message_count": len(chatInDB.messages),
+            return {
+                "meta":{"message_count": len(chatInDB.messages),
                     "user_count": len(chatInDB.users)
                     },
-                chat=chat,
-                messages = chatInDB.messages,
-                users = chatInDB.users
-            )
-        elif "users" in include:
-            return ChatResponse(
-                meta={"message_count": len(chatInDB.messages),
-                    "user_count": len(chatInDB.users)
-                    },
-                chat=chat,
-                users = chatInDB.users
-            )
-        else:
-            return ChatResponse(
-                meta={"message_count": len(chatInDB.messages),
-                    "user_count": len(chatInDB.users)
-                    },
-                chat=chat,
-                messages = chatInDB.messages
-            )
-    else:
-        return ChatResponse(
-            meta={"message_count": len(chatInDB.messages),
-                "user_count": len(chatInDB.users)
+                "chat":{
+                    chat
                 },
-            chat=chat,
-        )
+                "messages":{
+                    chatInDB.messages
+                },
+                "users":{
+                    chatInDB.users
+                }
+            }
+            
+        elif "users" in include:
+            return {
+                "meta":{"message_count": len(chatInDB.messages),
+                    "user_count": len(chatInDB.users)
+                    },
+                "chat":{
+                    chat
+                },
+                "users":{
+                    chatInDB.users
+                }
+            }
+        else:
+            return {
+                "meta":{"message_count": len(chatInDB.messages),
+                    "user_count": len(chatInDB.users)
+                    },
+                "chat":{
+                    chat
+                },
+                "messages":{
+                    chatInDB.messages
+                }
+            }
+    else:
+        return {
+                "meta":{"message_count": len(chatInDB.messages),
+                    "user_count": len(chatInDB.users)
+                    },
+                "chat":{
+                    chat
+                }
+        }
 
 
 
