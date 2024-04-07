@@ -163,9 +163,7 @@ function ChatListContainer() {
       
       return( 
         <div>       
-         
           <ChatCardContainer messages={data.messages} chatId = {chatId} />
-         
         </div>
 
       )
