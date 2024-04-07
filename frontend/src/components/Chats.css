@@ -6,7 +6,6 @@
 .chat-list-container {
     display: flex;
     flex-direction: column;
-    max-height: 90vh;
     margin: 0 20px;
 }
 
@@ -70,8 +69,6 @@
     display: flex;
     flex-direction: column;
     max-height: 80vh;
-    
-    overflow-y: scroll;
 }
 .message-list-item{
     display: flex;
