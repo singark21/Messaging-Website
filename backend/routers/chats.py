@@ -146,3 +146,15 @@ def get_users(chat_id: int, session: Session = Depends(db.get_session)):
 
 
 
+@chats_router.put("/{chat_id}/messages/{message_id}", 
+                  response_model=ChatResponse,
+                  description="Updates a chat with the given chat id.",)
+def update_chat(chat_id: int, edited_message: NewMessage, message_id: int,  session: Session = Depends(db.get_session)):
+    """Update an chat for a given id."""
+    chatInDB = db.update_chat(session, chat_id, chat_update)
+    userInDB = db.get_user_by_id(session,chatInDB.owner.id)
+    userResponse = User(id=userInDB.id, username=userInDB.username, email=userInDB.email, created_at=userInDB.created_at)
+    chat_response = Chat(id=chatInDB.id, name=chatInDB.name, owner=userResponse, created_at=chatInDB.created_at)
+    return ChatResponse(
+        chat=chat_response
+    )
