@@ -44,7 +44,7 @@ function ChatCard({ messages,chatId }) {
     const messageData = {
       text: message.trim(),
     };
-
+    
     // Send a POST request to create a new message in the chat
     const response = await fetch(`http://localhost:8000/chats/${chatId}/messages`, {
       method: 'POST',
@@ -127,12 +127,17 @@ function ChatCardContainer({ messages, chatId }) {
   }
 
 function ChatListContainer() {
+  const token = getToken();
     const { data } = useQuery({
       queryKey: ["chats"],
       queryFn: () => (
-        fetch("http://127.0.0.1:8000/chats")
-          .then((response) => response.json())
-      ),
+        fetch("http://127.0.0.1:8000/chats", {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        .then((response) => response.json())
+    ),
     });
   
     if (data?.chats) {
@@ -151,10 +156,17 @@ function ChatListContainer() {
 
 
   function ChatCardQueryContainer({ chatId }) {
+    const token = getToken();
     const { data } = useQuery({
       queryKey: ["chats", chatId, "messages"],
       queryFn: () => (
-        fetch(`http://127.0.0.1:8000/chats/${chatId}/messages`)
+        fetch(`http://127.0.0.1:8000/chats/${chatId}/messages`,
+        {
+          headers: {
+              'Authorization': `Bearer ${token}`,
+          },
+      }
+      )
           .then((response) => response.json())
       ),
     });

@@ -37,7 +37,7 @@ def get_all_users(session: Session) -> list[UserInDB]:
     return session.exec(select(UserInDB)).all()
 
 
-def get_all_chats(session: Session) -> list[ChatInDB]:
+def get_all_chats(session: Session, user:UserInDB) -> list[ChatInDB]:
     """
     Retrieve all chats from the database.
 
@@ -93,15 +93,11 @@ def update_user(session: Session, user: UserInDB, user_update: UserUpdate):
 
     for attr, value in user_update.model_dump(exclude_unset=True).items():
         setattr(user, attr, value)
-
     
     session.add(user)
     session.commit()
     session.refresh(user)
     return user
-
-
-
 
 
 
@@ -183,13 +179,11 @@ def update_chat(session: Session, chat_id: int, chat_update: ChatUpdate ) -> Cha
     :param chat_update: attributes to be updated on the chat
     :return: the updated chat
     """
-
     chat = get_chat_by_id(session, chat_id)
 
     for attr, value in chat_update.model_dump(exclude_unset=True).items():
         setattr(chat, attr, value)
 
-    
     session.add(chat)
     session.commit()
     session.refresh(chat)
@@ -202,12 +196,9 @@ def delete_chat(session: Session, chat_id: int):
     :param chat_id: the id of the chat to be deleted
     :raises EntityNotFoundException: if no such chat exists
     """
-
     chat = get_chat_by_id(session, chat_id)
     session.delete(chat)
     session.commit()
-
-
 
 if os.environ.get("DB_LOCATION") == "RDS":
     username = os.environ.get("PG_USERNAME")
@@ -234,3 +225,54 @@ def create_db_and_tables():
 def get_session():
     with Session(engine) as session:
         yield session
+
+
+def update_message(session: Session, chat_id: int, message_id: int, user_id: int, new_message: NewMessage ) -> MessageInDB:
+    """
+    Update an message in the database.
+    :param chat_id: id of the chat to be updated
+    :param message_id: id of the message to be updated
+    :param new_message: attributes to be updated on the message
+    :return: the updated message
+    """
+
+    chat = get_chat_by_id(session, chat_id)
+    message = session.get(MessageInDB,message_id)
+    if not message:
+        raise EntityNotFoundException(entity_name="Message", entity_id=message_id)
+    if message.user_id != user_id:
+        raise HTTPException(
+            status_code = 403,
+            detail={
+                "error": "no_permission",
+                "error_description": "requires permission to edit message"
+            })
+    
+    if message and chat:
+        message.text = new_message.text
+        #message.created_at = datetime.now()
+
+        session.commit()
+        session.refresh(message)
+        return message
+    
+    
+
+
+def delete_message(session: Session, chat_id: int, message_id: int, user_id: int):
+    #chat = get_chat_by_id(session, chat_id)
+    message = session.get(MessageInDB,message_id)
+    get_chat_by_id(session, chat_id)
+    if not message:
+        raise EntityNotFoundException(entity_name="Message", entity_id=message_id)
+    if message.user_id != user_id:
+        raise HTTPException(
+            status_code = 403,
+            detail={
+                "error": "no_permission",
+                "error_description": "requires permission to edit message"
+            })
+    
+    session.delete(message)
+    session.commit()
+    
