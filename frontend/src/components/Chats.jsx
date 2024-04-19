@@ -2,7 +2,8 @@ import { useQuery,useQueryClient } from "react-query"
 import { useState } from "react";
 import { Link,useParams } from "react-router-dom";
 import "./Chats.css";
-import { getToken } from "../context/auth";
+import { useAuth,useApi } from "../hooks";
+
 import ScrollContainer from "./ScrollContainer";
 
 
@@ -28,33 +29,25 @@ function ChatList({ chats }){
 }
 
 function ChatCard({ messages,chatId }) {
+  const api = useApi();
+
   const { data } = useQuery({
     queryKey: ["chats"],
     queryFn: () => (
-      fetch("http://127.0.0.1:8000/chats")
-        .then((response) => response.json())
+      api.get("/chats").then((response) => response.json())
     ),
   });
   const [message, setMessage] = useState("");
   const queryClient = useQueryClient();
   const handleMessageSubmit = async (e) => {
   e.preventDefault();
-
   try {
     const messageData = {
       text: message.trim(),
     };
     
     // Send a POST request to create a new message in the chat
-    const response = await fetch(`http://localhost:8000/chats/${chatId}/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': `application/json`,
-        'Authorization': `Bearer `+ getToken(),
-
-      },
-      body: JSON.stringify(messageData),
-    });
+    const response = await api.post(`/chats/${chatId}/messages`, messageData);
 
     if (!response.ok) {
       throw new Error('Failed to create message');
@@ -127,16 +120,11 @@ function ChatCardContainer({ messages, chatId }) {
   }
 
 function ChatListContainer() {
-  const token = getToken();
+  const api = useApi();
     const { data } = useQuery({
       queryKey: ["chats"],
       queryFn: () => (
-        fetch("http://127.0.0.1:8000/chats", {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        })
-        .then((response) => response.json())
+        api.get("/chats").then((response) => response.json())
     ),
     });
   
@@ -156,18 +144,11 @@ function ChatListContainer() {
 
 
   function ChatCardQueryContainer({ chatId }) {
-    const token = getToken();
+    const api = useApi();
     const { data } = useQuery({
       queryKey: ["chats", chatId, "messages"],
       queryFn: () => (
-        fetch(`http://127.0.0.1:8000/chats/${chatId}/messages`,
-        {
-          headers: {
-              'Authorization': `Bearer ${token}`,
-          },
-      }
-      )
-          .then((response) => response.json())
+        api.get(`/chats/${chatId}/messages`).then((response) => response.json())
       ),
     });
 

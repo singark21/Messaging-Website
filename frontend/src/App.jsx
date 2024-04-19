@@ -8,14 +8,12 @@ import Button from "./components/Button";
 import { AuthProvider } from "./context/auth";
 import { UserProvider } from "./context/user";
 import { useAuth } from "./hooks";
-import LeftNav from "./components/LeftNav";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
 import Registration from "./components/Registration";
 import TopNav from "./components/TopNav";
 
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 
 const queryClient = new QueryClient();
