@@ -36,6 +36,6 @@ function UserProvider({ children }) {
 //const useUser = () => useContext(UserContext);
 function useUser() {
     return useContext(UserContext);
-  }
+}
   
 export {UserContext, UserProvider, useUser };
