@@ -19,11 +19,11 @@ function LoginLink() {
   return (
     <div className="pt-8 flex flex-col">
       <div className="text-xs">
-        already have an account?
+        Already have an account?
       </div>
       <Link to="/login">
         <Button className="mt-1 w-full">
-          login
+          Login
         </Button>
       </Link>
     </div>
@@ -63,11 +63,11 @@ function Registration() {
   return (
     <div className="max-w-96 mx-auto py-8 px-4">
       <form onSubmit={onSubmit}>
-        <FormInput type="text" name="username" setter={setUsername} />
-        <FormInput type="email" name="email" setter={setEmail} />
-        <FormInput type="password" name="password" setter={setPassword} />
+        <FormInput type="text" name="Username" setter={setUsername} />
+        <FormInput type="email" name="Email" setter={setEmail} />
+        <FormInput type="password" name="Password" setter={setPassword} />
         <Button className="w-full" type="submit" disabled={disabled}>
-          register
+          Register
         </Button>
         <Error message={error} />
       </form>

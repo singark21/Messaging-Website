@@ -19,11 +19,11 @@ function RegistrationLink() {
   return (
     <div className="pt-8 flex flex-col">
       <div className="text-xs">
-        need an account?
+        Don't have an account?
       </div>
       <Link to="/registration">
         <Button className="mt-1 w-full">
-          register
+          Register
         </Button>
       </Link>
     </div>
@@ -56,7 +56,7 @@ function Login() {
             setError(data.detail.error_description);
           });
         } else {
-          setError("error logging in");
+          setError("Error logging in");
         }
       });
   }
@@ -64,10 +64,10 @@ function Login() {
   return (
     <div className="max-w-96 mx-auto py-8 px-4">
       <form onSubmit={onSubmit}>
-        <FormInput type="text" name="username" setter={setUsername} />
-        <FormInput type="password" name="password" setter={setPassword} />
+        <FormInput type="text" name="Username" setter={setUsername} />
+        <FormInput type="password" name="Password" setter={setPassword} />
         <Button className="w-full" type="submit" disabled={disabled}>
-          login
+          Login
         </Button>
         <Error message={error} />
       </form>

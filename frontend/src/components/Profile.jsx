@@ -45,7 +45,7 @@ function Profile() {
   return (
     <div className="max-w-96 mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold py-2">
-        details
+        Details
       </h2>
       <form className="border rounded px-4 py-2" onSubmit={onSubmit}>
       <div className="flex items-center mb-4">
@@ -76,7 +76,7 @@ function Profile() {
         </div>    
       </form>
       <Button onClick={logout}>
-        logout
+        Logout
       </Button>
     </div>
   );

@@ -8,11 +8,6 @@ import { useUser } from "../hooks";
 import ScrollContainer from "./ScrollContainer";
 
 
-
-
-
-
-
 function ChatListItem({ chat }) {
     return (
       <Link key={chat.id} to={`/chats/${chat.id}`} className="chat-list-item">

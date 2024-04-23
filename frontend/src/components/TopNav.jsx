@@ -25,7 +25,7 @@ function AuthenticatedNavItems() {
 
   return (
     <>
-      <NavItem to="/chats" name="pony express" />
+      <NavItem to="/chats" name="Pony Express" />
       <div className="flex-1" />
       <NavItem to="/profile" name={user?.username} right />
     </>
@@ -35,9 +35,9 @@ function AuthenticatedNavItems() {
 function UnauthenticatedNavItems() {
   return (
     <>
-      <NavItem to="/" name="pony express" />
+      <NavItem to="/" name="Pony Express" />
       <div className="flex-1" />
-      <NavItem to="/login" name="login" right />
+      <NavItem to="/login" name="Login" right />
     </>
   );
 }

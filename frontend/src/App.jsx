@@ -27,8 +27,10 @@ function Home() {
 
   return (
     <div className="max-w-4/5 mx-auto text-center px-4 py-8">
-      <div className="py-2">
-        This is the pony express messaging application. Send messages to people in chats.  
+      <div className="py-2 leading-10 text-lg">
+        <p>
+        This is the Pony Express messaging platform! Send messages securely and with ease to your friends and family. Built by Arkein Singh as part of a website development course at the University of Utah during Spring 2024.
+        </p>
       </div>
 
       <Link to="/registration">
