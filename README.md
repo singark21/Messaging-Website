@@ -1,50 +1,14 @@
-# Pony Express - a chat application
+# Messaging Website
 
-## Backend
+Send messages securely and with ease to your friends and family. Built by Arkein Singh as part of a website development course at the University of Utah during Spring 2024.
 
-The backend of the application is written in python using the
-[https://fastapi.tiangolo.com/](FastAPI) framework.
+Includes the ability to securely create accounts and send messages to other users in chats.
 
-### Setup/Development
-If you are using `poetry`, the dependencies may be installed as follows.
-```bash
-poetry install
-```
-Make sure that your IDE is setup to use the poetry virtual environment.  If you use
-VSCode, you can run
-```bash
-poetry run code .
-```
-to start the application or you may connect the virtual environment manually.
+Currently working on features such as creating new chats with new users.
 
-If you are managing your virtual environment with `venv`, make sure you build and activate
-your virtual environment as specified. With your virtual environment activated, the
-dependencies may be installed as follows.
-```bash
-python -m pip install -r requirements.txt
-```
-Make sure that your IDE is setup to use the virtual environment. If you use VSCode, you
-can run
-```bash
-code .
-```
-while the virtual environment is activated or you may connect the virtual environment
-manually.
+To test the full capability, log in with username: sarah, and password: sarahpassword.
 
-### Running the server locally
-If you are using poetry, the local server can be started as follows.
-```bash
-poetry run uvicorn backend.main:app --reload
-```
+Link: https://main.dl1uhvql3jcm4.amplifyapp.com/
 
-If you are using a virtual environment, the local server can be started from within the
-virtual environment as follows.
-```bash
-uvicorn backend.main:app --reload
-```
 
-Now you should be able to make requests against `http://127.0.0.1:8000` to test your API
-locally. You can also inspect the documentation using one of the following:
-- swagger at `http://127.0.0.1:8000/docs`
-- redoc at `http://127.0.0.1:8000/redoc`
 
